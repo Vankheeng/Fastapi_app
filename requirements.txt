@@ -1,0 +1,6 @@
+fastapi
+pydantic
+SQLAlchemy
+SQLAlchemy_utils
+pyjwt
+"passlib[bcrypt]"
