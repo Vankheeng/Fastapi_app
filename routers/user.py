@@ -14,7 +14,7 @@ router = APIRouter(
 get_db = database.get_db
 
 @router.get('/', response_model=User)
-def get_user(username:str, db: Session = Depends(get_db), current_user: TokenData = Depends()):
+def get_user(username:str, db: Session = Depends(get_db), current_user: TokenData = Depends(oauth2.get_current_user)):
     return user.find_user(username, db)
 
 @router.post("/create", status_code=200)

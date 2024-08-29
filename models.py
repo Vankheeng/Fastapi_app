@@ -28,18 +28,14 @@ class Group(Base):
     blogs = relationship("Blog", back_populates="group")
     
 class Member(Base):
-    ROLES = (
-        ('Waiting', 'WAITING'), ('Member', 'MEMBER'), ('Admin', 'ADMIN'), ('Moderator', 'MODERATOR')
-    )
-    # Admin: Access with full control
-    # Moderator: Can't delete group or rename
-    
     __tablename__ = "members"
+    
     
     id = Column(Integer, primary_key=True)
     group_id = Column(Integer, ForeignKey('groups.id'))
     user_id = Column(Integer, ForeignKey("users.id"))
-    role = Column(ChoiceType(choices = ROLES), default='Member')
+    inviter = Column(Integer)
+    role = Column(Integer)
     create_time = Column(DateTime)
     
     user = relationship("User", back_populates="members")
@@ -61,17 +57,13 @@ class Blog(Base):
     comments = relationship("Comments", back_populates="blog")
     
 class Reactions(Base):
-    
-    REACT_STATUS = (
-        ('Love', 'LOVE'), ('Like', 'LIKE'), ('Haha', 'HAHA'), ('Angry', 'ANGRY')
-    )
         
     __tablename__="reactions"
     
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     blog_id = Column(Integer, ForeignKey("blogs.id"))
-    status = Column(ChoiceType(choices=REACT_STATUS), default='Love')
+    status = Column(Integer, default=0)
     time = Column(DateTime)
     
     user = relationship("User", back_populates="reactions")

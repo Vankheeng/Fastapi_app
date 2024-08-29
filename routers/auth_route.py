@@ -14,7 +14,7 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
     if not user:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, 
                             detail="Mat khau hoac tai khoan khong dung")
-    if Hash.verify(request.password, user.hashed_password):
+    if not Hash.verify(request.password, user.hashed_password):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, 
                             detail="Mat khau khong dung")
     access_token = token.create_access_token(data = {"sub": user.username})
