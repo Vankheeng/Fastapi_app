@@ -15,8 +15,8 @@ class User(Base):
     
     members = relationship("Member", back_populates = "user")
     blogs = relationship("Blog", back_populates="user")
-    reactions = relationship("Reactions", back_populates="user")
-    comments = relationship("Comments", back_populates="user")
+    reactions = relationship("Reaction", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
     
 class Group(Base):
     __tablename__ = "groups"
@@ -48,15 +48,16 @@ class Blog(Base):
     group_id = Column(Integer, ForeignKey("groups.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     content = Column(String(1000), nullable=False)
-    Status = Column(String(100))
+    status = Column(Integer)
+    create_time = Column(DateTime)
     
     
     user = relationship("User", back_populates="blogs")
     group = relationship("Group", back_populates="blogs")
-    reactions = relationship("Reactions", back_populates="blog")
-    comments = relationship("Comments", back_populates="blog")
+    reactions = relationship("Reaction", back_populates="blog")
+    comments = relationship("Comment", back_populates="blog")
     
-class Reactions(Base):
+class Reaction(Base):
         
     __tablename__="reactions"
     
@@ -69,13 +70,13 @@ class Reactions(Base):
     user = relationship("User", back_populates="reactions")
     blog = relationship("Blog", back_populates="reactions")
     
-class Comments(Base):
+class Comment(Base):
     __tablename__ = "comments"
     
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     blog_id = Column(Integer, ForeignKey("blogs.id"))
-    status = Column(String(1000), nullable=False)
+    content = Column(String(1000), nullable=False)
     time = Column(DateTime)
     
     user = relationship("User", back_populates="comments")

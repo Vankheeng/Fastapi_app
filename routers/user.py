@@ -8,7 +8,7 @@ from repository import user
 
 router = APIRouter(
     prefix='/user',
-    tags=['User']
+    tags=['Users']
 )
 
 get_db = database.get_db

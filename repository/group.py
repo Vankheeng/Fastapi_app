@@ -6,15 +6,16 @@ import models, oauth2
 import schemas.group
 from schemas.user import TokenData
 from datetime import datetime
+from models import Group, Member, User, Blog, Reaction, Comment
 
 def create_group(request: schemas.group.CreateGroup , current_user: int , db : Session = Depends(get_db)):
-    group = db.query(models.Group).filter(models.Group.name == request.name).first()
+    group = db.query(Group).filter(Group.name == request.name).first()
     if group:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This group name existed")
-    new_group = models.Group(name = request.name)
+    new_group = Group(name = request.name)
     db.add(new_group)
     db.commit()
-    new_member = models.Member(
+    new_member = Member(
         group_id = new_group.id,
         user_id = current_user,
         role = 2,
@@ -26,28 +27,37 @@ def create_group(request: schemas.group.CreateGroup , current_user: int , db : S
     return new_group
 
 def find_group(groupname: str, db: Session = Depends(get_db)):
-    groups = db.query(models.Group).filter(models.Group.name == groupname).first()
+    groups = db.query(Group).filter(Group.name == groupname).first()
     if not groups:
         raise HTTPException(status_code=404, detail="This group {groupname} doesn't exist")
     return groups
 
 def delete_group(groupname: str, db: Session = Depends(get_db),  current_user: str = Depends()):
-    user = db.query(models.User).filter(models.User.username == current_user.username).first()
-    group = db.query(models.Group).filter(models.Group.name == groupname).first()
-    member = db.query(models.Member).filter(models.Member.user_id == user.id).first()
+    user = db.query(User).filter(User.username == current_user.username).first()
+    group = db.query(Group).filter(Group.name == groupname).first()
+    
+    if not group: 
+        raise HTTPException(status_code=400, 
+                            detail=f"Couldn't find this group {groupname}")
+        
+    member = db.query(Member).filter(Member.user_id == user.id,
+                                            Member.group_id == group.id).first()
     if not member:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="You are not this group's member")
     if(member.role != 2):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Only admin can delete groups")
-    if not group: 
-        raise HTTPException(status_code=400, 
-                            detail="Couldn't find this group {groupname}")
+    
     db.delete(group)
-    members = db.query(models.Member).filter(models.Member.group_id == group.id)
-    if members is not None:
-        members.delete(synchronize_session=False)
+    members = db.query(Member).filter(Member.group_id == group.id).delete
+    blogs = db.query(Blog).filter(Blog.group_id == group.id).all()
+    if blogs:
+        for blog in blogs:
+            db.query(Comment).filter(Comment.blog_id == blog.id).delete
+            db.query(Reaction).filter(Reaction.blog_id == blog.id).delete
+            db.delete(blog)
     db.commit()
+    return{"Deleted"}
     
     

@@ -8,7 +8,6 @@ class CreateGroup(BaseModel):
         from_attributes = True
         
 class ShowGroup(BaseModel):
-    id: int
     name:str
     # Admin: List[User]
     class Config():
